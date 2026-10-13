@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DailyGain.ng | Profit Calculator</title>
+    <style>
+        :root {
+            --green-900: #0d3d2e;
+            --green-800: #124f3c;
+            --green-700: #176a4a;
+            --green-600: #1c825d;
+            --green-200: #cfeadf;
+            --green-100: #edf7f0;
+            --cream: #f5f7f1;
+            --white: #ffffff;
+            --text: #1a2e25;
+            --muted: #596e63;
+            --gold: #d9b060;
+            --danger: #bf2a2a;
+            --danger-soft: #fdeaea;
+            --success: #1d8a60;
+            --success-soft: #eafaf1;
+            --shadow: 0 18px 40px rgba(13, 61, 46, 0.12);
+        }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; min-height: 100vh; font-family: "Segoe UI", Arial, sans-serif;
+            background-image: url(img2.jpg); background-size: cover; background-position: center; background-repeat: no-repeat;
+        }
+        a { text-decoration: none; }
+        button, input { font: inherit; }
+        .page-shell { width: min(1120px, calc(100% - 32px)); margin: 0 auto; padding: 28px 0 48px; }
+        .calc-header { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
+        .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--green-800); font-weight: 700; }
+        .back-link svg, .brand-block svg { display: block; width: 20px; height: 20px; }
+        .brand-mark {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border-radius: 12px;
+            background: var(--green-900); color: var(--white);
+        }
+        .brand-block { display: inline-flex; align-items: center; gap: 8px; font-size: 1.1rem; font-weight: 800; color: var(--green-900); }
+        .calc-main { display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 28px; align-items: start; }
+        .calculator-panel, .info-panel {
+            background: var(--white); border: 1px solid rgba(13,61,46,0.08); border-radius: 26px; box-shadow: var(--shadow);
+        }
+        .calculator-panel { padding: clamp(24px, 4vw, 38px); }
+        .panel-header { margin-bottom: 28px; }
+        .panel-header h1 { margin: 0; font-size: clamp(2rem, 4vw, 2.8rem); line-height: 1.1; letter-spacing: -0.04em; color: var(--text); }
+        .panel-header p:last-child { margin: 12px 0 0; color: var(--muted); font-size: 1.05rem; }
+        .eyebrow {
+            margin: 0 0 14px; letter-spacing: 0.18em; text-transform: uppercase; font-size: 0.74rem; font-weight: 800; color: var(--green-700);
+        }
+        form { display: block; }
+        .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; }
+        .field { display: flex; flex-direction: column; gap: 8px; font-weight: 700; color: var(--text); }
+        .field input {
+            width: 100%; border: 1px solid rgba(13,61,46,0.14); background: #f9fbf9; border-radius: 14px; padding: 0.9rem 1rem; color: var(--text); transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .field input:focus { outline: none; border-color: rgba(23,106,74,0.5); box-shadow: 0 0 0 4px rgba(23,106,74,0.08); }
+        :focus-visible { outline: 3px solid var(--gold); outline-offset: 4px; }
+        .field.full { grid-column: 1 / -1; }
+        .calc-btn { width: 100%; margin-top: 24px; border: none; cursor: pointer;height:auto; padding: 14px 0; border-radius: 14px; background: var(--green-900); color: var(--white); font-weight: 700; font-size: 1.05rem; transition: background-color 0.2s ease, box-shadow 0.2s ease; }
+        .result-box {
+            display: none; margin-top: 22px; padding: 18px 20px; border-radius: 16px; border-left: 6px solid var(--success); background: var(--success-soft); color: var(--green-900); font-weight: 700;
+        }
+        .result-box.error { background: var(--danger-soft); border-left-color: var(--danger); color: #7a1a1a; }
+        .result-box.visible { display: block; }
+        .result-box strong { font-size: 1.1rem; }
+        .info-panel { padding: 22px; }
+        .info-panel img { width: 100%; border-radius: 18px; height: 260px; object-fit: cover; }
+        .formula-box { background: var(--green-100); border-radius: 18px; padding: 20px; margin-top: 20px; }
+        .formula-box h2 { margin: 0 0 10px; font-size: 1.3rem; color: var(--green-900); }
+        .formula-box p { margin: 0; color: var(--green-800); font-weight: 700; }
+        @media (max-width: 860px) { .calc-main { grid-template-columns: 1fr; } }
+        @media (max-width: 560px) {
+            .form-grid { grid-template-columns: 1fr; }
+            .calc-header { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page-shell">
+        <header class="calc-header">
+            <a class="back-link" href="index.html">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                    <path d="m15 18-6-6 6-6"></path>
+                    <path d="M9 12h12"></path>
+                </svg>
+                Back to Home
+            </a>
+            <div class="brand-block">
+                <span class="brand-mark">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+                        <path d="M3 18h18M5 15l4-4 4 3 7-8"></path>
+                        <path d="M12 5v6M10 6h4M10 9h4"></path>
+                    </svg>
+                </span>
+                DailyGain.ng
+            </div>
+        </header>
+
+        <main class="calc-main">
+            <section class="calculator-panel" aria-labelledby="calculator-title">
+                <div class="panel-header">
+                    <p class="eyebrow">Profit calculator</p>
+                    <h1 id="calculator-title">Check Your Business Profit</h1>
+                    <p>Enter your numbers below to see how much you are making or losing.</p>
+                </div>
+
+                <form id="profit-form" novalidate>
+                    <div class="form-grid">
+                        <label class="field full">
+                            <span>Product name</span>
+                            <input id="pname" type="text" placeholder="e.g. Rice bag" required>
+                        </label>
+
+                        <label class="field">
+                            <span>Cost price (&#8358;)</span>
+                            <input id="cost" type="number" min="0" step="0.01" placeholder="e.g. 4500" required>
+                        </label>
+
+                        <label class="field">
+                            <span>Selling price (&#8358;)</span>
+                            <input id="sell" type="number" min="0" step="0.01" placeholder="e.g. 6000" required>
+                        </label>
+
+                        <label class="field full">
+                            <span>Other expenses (&#8358;)</span>
+                            <input id="expense" type="number" min="0" step="0.01" placeholder="e.g. 500" required>
+                        </label>
+                    </div>
+
+                    <button class="primary-btn calc-btn" type="submit">Calculate Profit</button>
+                </form>
+
+                <div id="result-box" class="result-box" role="status" aria-live="polite"></div>
+            </section>
+
+            <aside class="info-panel" aria-label="Helpful calculator information">
+                <img src="img3.jpg" alt="A business owner checking sales and profit figures">
+
+                <div class="formula-box">
+                    <h2>Profit formula</h2>
+                    <p>Profit = Selling price - Cost price - Expenses</p>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <script>
+        const form = document.getElementById('profit-form');
+        const resultBox = document.getElementById('result-box');
+
+        form.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const productName = document.getElementById('pname').value.trim();
+            const costValue = document.getElementById('cost').value.trim();
+            const sellValue = document.getElementById('sell').value.trim();
+            const expenseValue = document.getElementById('expense').value.trim();
+
+            if (!productName || !costValue || !sellValue || !expenseValue) {
+                resultBox.classList.add('visible', 'error');
+                resultBox.innerHTML = 'Please fill in all fields before calculating your profit.';
+                return;
+            }
+
+            const cost = Number(costValue);
+            const sell = Number(sellValue);
+            const expense = Number(expenseValue);
+
+            if ([cost, sell, expense].some((value) => Number.isNaN(value) || value < 0)) {
+                resultBox.classList.add('visible', 'error');
+                resultBox.innerHTML = 'Please enter valid numbers greater than or equal to 0.';
+                return;
+            }
+
+            const profit = sell - cost - expense;
+            const isLoss = profit < 0;
+            const resultMessage = profit === 0
+                ? 'You broke even. Your sales covered your costs and expenses.'
+                : isLoss
+                    ? 'You are making a loss right now.'
+                    : 'You are making money. Great job!';
+
+            resultBox.classList.add('visible');
+            resultBox.classList.toggle('error', isLoss);
+            resultBox.innerHTML = `
+                <strong>${productName}</strong><br>
+                Profit: <span>&#8358;${profit.toLocaleString()}</span><br>
+                ${resultMessage}
+            `;
+
+            resultBox.style.borderLeftColor = isLoss ? 'var(--danger)' : 'var(--success)';
+            resultBox.style.background = isLoss ? 'var(--danger-soft)' : 'var(--success-soft)';
+            resultBox.style.color = isLoss ? '#7a1a1a' : 'var(--green-900)';
+        });
+    </script>
+</body>
+</html>
